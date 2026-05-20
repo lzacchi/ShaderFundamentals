@@ -1,6 +1,6 @@
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Custom/My First Shader" {
+Shader "Custom/Simple Shader" {
     Properties{
         _Tint ("Tint", Color) = (1,1,1,1)  // Property is defined as property_name(str, type)
         _MainTex("Texture", 2D) = "white" {}
