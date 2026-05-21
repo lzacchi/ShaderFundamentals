@@ -6,10 +6,16 @@ Shader "Custom/Simple Lighting Shader" {
         _Tint ("Tint", Color) =  (1, 1, 1, 1)
         _MainTex ("Albedo", 2D) = "white" {}
         [NoScaleOffset]
-        _HeightMap ("Height Map", 2D) = "gray" {}
-        _Smoothness ("Smoothness", Range(0,1)) = 0.5
+        _NormalMap ("Normals", 2D) = "bump" {}
+        // [NoScaleOffset] _HeightMap ("Height Map", 2D) = "gray" {}
+        _DetailTex ("Detail Texture", 2D) = "gray" {}
+        [NoScaleOffset]
+        _DetailNormalMap ("Detail Normals", 2D) = "bump" {}
+        _BumpScale ("Bump Scale", Float) = 1
+        _DetailBumpScale ("Detail Bump Scale", Float) = 1
         [Gamma]
         _Metallic ("Metallic", Range(0, 1)) = 0
+        _Smoothness ("Smoothness", Range(0,1)) = 0.5
     }
 
     Subshader {
