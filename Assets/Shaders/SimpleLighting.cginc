@@ -27,11 +27,18 @@ struct Interpolators {
     float4 position : SV_POSITION;
     float4 uv : TEXCOORD0;
     float3 normal : TEXCOORD1;
+
+    #if defined(BINORMAL_PER_FRAGMENT)
     float4 tangent : TEXCOORD2;
-    float3 worldPos : TEXCOORD3;    // Required for specular highlights
+    #else
+    float3 tangent : TEXCOORD2;
+    float3 binormal : TEXCOORD3;
+    #endif
+
+    float3 worldPos : TEXCOORD4;    // Required for specular highlights
 
     #if defined(VERTEXLIGHT_ON)
-    float3 vertexLightColor : TEXCOORD4;
+    float3 vertexLightColor : TEXCOORD5;
     #endif
 };
 
@@ -56,6 +63,10 @@ void ComputeVertexLightColor(inout Interpolators i) {
 
 }
 
+float3 CreateBinormal(float3 normal, float3 tangent, float binormalSign) {
+    return cross(normal, tangent.xyz) * (binormalSign * unity_WorldTransformParams.w);
+}
+
 Interpolators MyVertexProgram(VertexData v) {
     // SV_POSITION Stands for System Value Position
     // The vertex program has to return the final coordinates of a vertex
@@ -70,7 +81,13 @@ Interpolators MyVertexProgram(VertexData v) {
     // i.normal = mul(transpose((float3x3)unity_ObjectToWorld), v.normal); // Alternatively, we can multiply the 3x3 part of the matrix.
     // The matrix is transposed, because the scaling transformation should be inverted to preserve the correct normal vectors.
     i.normal = UnityObjectToWorldNormal(v.normal);
+
+    #if defined(BINORMAL_PER_FRAGMENT)
     i.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
+    #else
+    i.tangent = UnityObjectToWorldDir(v.tangent.xyz);
+    i.binormal = CreateBinormal(i.normal, i.tangent, v.tangent.w);
+    #endif
     // Of course, Unity has a function that implements that operation.
     i.uv.xy = TRANSFORM_TEX(v.uv, _MainTex);
     i.uv.zw = TRANSFORM_TEX(v.uv, _DetailTex);
@@ -158,7 +175,12 @@ void InitializeFragmentNormal(inout Interpolators i) {
     // or by using Unity's own implementations:
 
     float3 tangent_space_normal = BlendNormals(main_normal, detail_normal);
+
+    #if defined(BINORMAL_PER_FRAGMENT)
     float3 binormal = cross(i.normal, i.tangent.xyz) * (i.tangent.w * unity_WorldTransformParams.w);
+    #else
+    float3 binormal = i.binormal;
+    #endif
 
     i.normal = normalize(tangent_space_normal.x * i.tangent + tangent_space_normal.y * binormal + tangent_space_normal.z * i.normal);
 

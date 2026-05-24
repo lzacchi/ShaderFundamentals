@@ -18,6 +18,10 @@ Shader "Custom/Simple Lighting Shader" {
         _Smoothness ("Smoothness", Range(0,1)) = 0.5
     }
 
+    CGINCLUDE
+    #define BINORMAL_PER_FRAGMENT
+    ENDCG
+
     Subshader {
         // A shader can have multiple subshaders
         Pass {
